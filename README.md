@@ -1,0 +1,8 @@
+Blockchain-Based Land Registry System for India
+
+
+This repository presents a literature review and feasibility study of blockchain-based land registry systems, focusing on architecture, governance, validation mechanisms, and adoption challenges in the Indian context.
+
+The project evaluates how blockchain can improve transparency, security, and trust in property records, while identifying limitations of existing land administration systems and realistic implementation requirements.
+
+This work has been submitted as part of the Project-Based Learning (PBL) course.
