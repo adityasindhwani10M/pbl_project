@@ -1,0 +1,6 @@
+Flask
+requests
+pytesseract
+PyPDF2
+Pillow
+Werkzeug
