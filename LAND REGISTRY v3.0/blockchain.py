@@ -15,7 +15,16 @@ IST = timezone(timedelta(hours=5, minutes=30))
 
 
 class Blockchain:
-    def __init__(self, db_path='landchain.db'):
+    def __init__(self, db_path=None):
+        if db_path is None:
+            db_path = os.environ.get('LANDCHAIN_DB_PATH')
+
+        if db_path is None:
+            db_path = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                'landchain.db'
+            )
+        self.db_path = db_path
         self.db_path = db_path
         self.chain = []
         self.w3 = None
