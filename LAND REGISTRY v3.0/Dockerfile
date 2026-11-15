@@ -16,4 +16,4 @@ COPY . .
 
 ENV PYTHONUNBUFFERED=1
 
-CMD ["sh", "-c", "gunicorn --workers 1 --bind 0.0.0.0:${PORT:-10000} app:app"]
+CMD ["sh", "-c", "gunicorn --workers 1 --timeout 180 --graceful-timeout 30 --bind 0.0.0.0:${PORT:-10000} app:app"]
