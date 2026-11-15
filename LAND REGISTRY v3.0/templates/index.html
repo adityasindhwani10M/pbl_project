@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LandChain India | Sovereign Cadastral & DLT Registry</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- Top Cadastral Utility Bar -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div class="brand" onclick="navigateTo('home')" role="button" tabindex="0">
+                <div class="brand-mark" aria-hidden="true">LC</div>
+                <div class="brand-text">
+                    <span class="brand-title">LandChain India</span>
+                    <span class="brand-subtitle">Cadastral DLT &amp; Zero-Trust Registry</span>
+                </div>
+            </div>
+
+            <nav class="nav-links" aria-label="Primary Navigation">
+                <button class="nav-btn active" data-target="home" onclick="navigateTo('home')">Overview</button>
+                <button class="nav-btn" data-target="add" onclick="navigateTo('add')">Register Deed</button>
+                <button class="nav-btn" data-target="transfer" onclick="navigateTo('transfer')">Transfer Title</button>
+                <button class="nav-btn" data-target="verify" onclick="navigateTo('verify')">Verify &amp; Search</button>
+                <button class="nav-btn" data-target="records" onclick="navigateTo('records')">Ledger Explorer</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- Dynamic Flash Alerts -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-banner {{ 'flash-error' if category == 'error' else 'flash-success' }}">
+                        <span>{{ message }}</span>
+                        <button class="flash-close" onclick="this.parentElement.remove()" aria-label="Dismiss alert">✕</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- ==================== PAGE 1: OVERVIEW (ASYMMETRIC SPLIT + BENTO) ==================== -->
+        <section id="home" class="page active">
+
+            <!-- Asymmetric 7:5 Split Hero -->
+            <div class="hero-split">
+                <div class="hero-editorial">
+                    <div class="eyebrow-row">
+                        <span class="tag-pill">SHA-256 HASH-LINKED LEDGER</span>
+                        <span class="tag-outline">GEMINI 3.8 FLASH + OCR</span>
+                    </div>
+                    <h1 class="hero-title">Tamper-Evident Land Title &amp; Deed Registry.</h1>
+                    <p class="hero-desc">
+                        Every sale deed is fingerprinted at byte level, parsed via server-side zero-trust extraction, anchored to OpenStreetMap coordinates, and committed to an immutable cryptographic chain.
+                    </p>
+                    <div class="action-row">
+                        <button class="btn btn-primary" onclick="navigateTo('add')">Upload &amp; Register Deed →</button>
+                        <button class="btn btn-secondary" onclick="navigateTo('verify')">Verify PDF / Search UPIN</button>
+                    </div>
+                </div>
+
+                <!-- Right Column: Vertical Live Ledger Telemetry Panel -->
+                <aside class="telemetry-panel" aria-label="Live Registry Telemetry">
+                    <div class="telemetry-header">
+                        <span class="telemetry-kicker">LIVE LEDGER TELEMETRY</span>
+                        <span class="status-dot {{ 'dot-ok' if stats.chain_valid else 'dot-err' }}">
+                            {{ 'CHAIN VERIFIED' if stats.chain_valid else 'TAMPER ALERT' }}
+                        </span>
+                    </div>
+
+                    <div class="telemetry-metrics">
+                        <div class="metric-row">
+                            <div>
+                                <div class="metric-label">Minted Blocks</div>
+                                <div class="metric-sub">SQLite + SHA-256 Store</div>
+                            </div>
+                            <div class="metric-num">{{ stats.total_blocks }}</div>
+                        </div>
+
+                        <div class="metric-row">
+                            <div>
+                                <div class="metric-label">Registered UPINs</div>
+                                <div class="metric-sub">Unique Active Land Titles</div>
+                            </div>
+                            <div class="metric-num">{{ stats.total_properties }}</div>
+                        </div>
+
+                        <div class="metric-row">
+                            <div>
+                                <div class="metric-label">Title Mutations</div>
+                                <div class="metric-sub">Verified Ownership Transfers</div>
+                            </div>
+                            <div class="metric-num">{{ stats.total_transfers }}</div>
+                        </div>
+                    </div>
+
+                    <div class="telemetry-footer">
+                        <div class="mono-caption">{{ stats.audit_msg }}</div>
+                        <div class="quick-links">
+                            <button class="link-action" onclick="navigateTo('transfer')">Execute Mutation ↗</button>
+                            <button class="link-action" onclick="navigateTo('records')">Inspect Raw Chain ↗</button>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            <!-- Asymmetric Bento Architecture Grid (8:4 / 4:8) -->
+            <div class="section-divider">
+                <span>SYSTEM ARCHITECTURE &amp; VERIFICATION GUARANTEES</span>
+            </div>
+
+            <div class="bento-grid">
+                <article class="bento-card bento-wide">
+                    <div class="bento-index">01 / CRYPTOGRAPHIC PROVENANCE</div>
+                    <h3>Server-Side Zero-Trust Payload Signing</h3>
+                    <p>
+                        Uploaded deeds are hashed with SHA-256 before text extraction begins. Extracted attributes are bound to a signed server session—preventing browser DevTools tampering or unauthorized manual overrides prior to block minting.
+                    </p>
+                </article>
+
+                <article class="bento-card bento-narrow bento-accent-tint">
+                    <div class="bento-index">02 / GEOSPATIAL</div>
+                    <h3>OSM Coordinate Pinning</h3>
+                    <p>
+                        Strips legal recital boilerplate and resolves physical latitude and longitude coordinates via OpenStreetMap Nominatim.
+                    </p>
+                </article>
+
+                <article class="bento-card bento-narrow">
+                    <div class="bento-index">03 / ANTI-FRAUD</div>
+                    <h3>Duplicate UPIN Guard</h3>
+                    <p>
+                        Blocks double-registration of existing property IDs and enforces seller-owner matching for all title transfers.
+                    </p>
+                </article>
+
+                <article class="bento-card bento-wide">
+                    <div class="bento-index">04 / DOCUMENT INTELLIGENCE</div>
+                    <h3>Dual-Layer AI &amp; Multi-Path Legal Regex Engine</h3>
+                    <p>
+                        Structured extraction powered by Gemini 3.8 Flash automatically falls back to deterministic Indian conveyance regex patterns when offline—ensuring uninterrupted extraction across individual, corporate, and institutional deeds.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <!-- ==================== PAGE 2: ADD PROPERTY ==================== -->
+        <section id="add" class="page">
+            <div class="page-head">
+                <span class="tag-pill">STEP 01 · ZERO-TRUST INTAKE</span>
+                <h2>Register New Property Deed</h2>
+                <p>Upload an official Sale Deed (PDF or scanned image). Manual field editing is locked at the server session level.</p>
+            </div>
+
+            <!-- Step 1: Smart Extraction Upload Card -->
+            <div class="surface-card accent-left" style="margin-bottom: 1.5rem;">
+                <div class="card-header-row">
+                    <div>
+                        <h3>1. Document Fingerprinting &amp; Entity Extraction</h3>
+                        <p class="muted-small">Generates a SHA-256 byte fingerprint and extracts the 5 legal title parameters.</p>
+                    </div>
+                    <span id="confidenceBadge" class="tag-pill" style="display: none;">96% Confidence</span>
+                </div>
+
+                <div class="upload-zone" style="margin-top: 1rem;">
+                    <input type="file" id="documentUpload" accept=".pdf, image/png, image/jpeg">
+                    <button type="button" class="btn btn-primary" onclick="extractData()">Scan &amp; Auto-Fill Deed</button>
+                </div>
+
+                <p id="ocrStatus" class="status-line" style="display: none;"></p>
+
+                <!-- Cryptographic Document Fingerprint Display -->
+                <div id="hashPreviewBox" class="hash-strip" style="display: none;">
+                    <span class="mono-label">PDF SHA-256:</span>
+                    <code id="docHashDisplay" class="mono-hash"></code>
+                    <span id="engineBadge" class="tag-outline" style="margin-left: auto;"></span>
+                </div>
+            </div>
+
+            <!-- Step 2: Locked Registration Form -->
+            <div class="surface-card">
+                <h3 style="margin-bottom: 1.25rem;">2. Locked Blockchain Registration Payload</h3>
+                <form action="/add" method="POST" onsubmit="return validateForm()">
+                    <input type="hidden" name="document_hash" id="inputDocHash">
+                    <input type="hidden" name="verified_coords" id="inputVerifiedCoords">
+
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="inputOwner">Owner / Purchaser Full Name [LOCKED]</label>
+                            <input type="text" name="owner" id="inputOwner" class="locked-input" placeholder="Auto-extracted from deed..." readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputId">Unique Property ID (UPIN / Doc No.) [LOCKED]</label>
+                            <input type="text" name="property_id" id="inputId" class="locked-input" placeholder="Auto-extracted from deed..." readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputLocation">Property Location &amp; Parcel Description [LOCKED]</label>
+                        <div class="location-input-group">
+                            <input type="text" name="location" id="inputLocation" class="locked-input" placeholder="Auto-extracted from deed..." readonly>
+                            <button type="button" class="btn btn-secondary" onclick="verifyMapLocation()">Verify on Map</button>
+                        </div>
+
+                        <div id="mapContainer" class="map-frame-wrapper" style="display: none;">
+                            <iframe id="osmMap" width="100%" height="260" frameborder="0" scrolling="no" src="" title="Property Location Map"></iframe>
+                            <p id="mapStatus" class="map-status-bar"></p>
+                        </div>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="inputCategory">Approved Land Category [LOCKED]</label>
+                            <input type="text" name="category" id="inputCategory" class="locked-input" placeholder="Auto-extracted from deed..." readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputArea">Total Plot / Unit Area [LOCKED]</label>
+                            <input type="text" name="area" id="inputArea" class="locked-input" placeholder="Auto-extracted from deed..." readonly>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full" style="margin-top: 0.5rem;">
+                        Mint Property Record to Blockchain
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ==================== PAGE 3: OWNERSHIP TRANSFER (MUTATION) ==================== -->
+        <section id="transfer" class="page">
+            <div class="page-head">
+                <span class="tag-pill">TITLE MUTATION</span>
+                <h2>Transfer Property Ownership</h2>
+                <p>Execute a verifiable chain-of-title mutation for an existing UPIN. Current legal ownership is validated against the latest block.</p>
+            </div>
+
+            <div class="surface-card">
+                <form action="/transfer" method="POST">
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="transferUpin">Registered Property ID (UPIN)</label>
+                            <div class="location-input-group">
+                                <input type="text" name="property_id" id="transferUpin" placeholder="e.g., 2024001234" required>
+                                <button type="button" class="btn btn-secondary" onclick="prefillCurrentOwner()">Fetch Owner</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="transferCurrentOwner">Verified Current Owner (Seller / Vendor)</label>
+                            <input type="text" name="current_owner" id="transferCurrentOwner" placeholder="Must match latest blockchain block..." required>
+                        </div>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="newOwnerInput">New Buyer / Transferee Full Name</label>
+                            <input type="text" name="new_owner" id="newOwnerInput" placeholder="Enter new legal owner name..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="transferReasonInput">Mutation / Conveyance Instrument Type</label>
+                            <input type="text" name="transfer_reason" id="transferReasonInput" value="Registered Sale Deed Conveyance" required>
+                        </div>
+                    </div>
+
+                    <p id="transferLookupStatus" class="status-line" style="display: none;"></p>
+
+                    <button type="submit" class="btn btn-primary btn-full" style="margin-top: 0.5rem;">
+                        Execute Ownership Transfer Block
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ==================== PAGE 4: VERIFY DEED & UPIN SEARCH ==================== -->
+        <section id="verify" class="page">
+            <div class="page-head">
+                <span class="tag-pill">CRYPTOGRAPHIC AUDIT SUITE</span>
+                <h2>UPIN Title Explorer &amp; Tamper Detector</h2>
+                <p>Inspect the chronological ownership chain for any UPIN or verify whether a PDF Sale Deed is authentic or altered.</p>
+            </div>
+
+            <div class="form-row-2">
+                <!-- UPIN Chain-of-Title Search -->
+                <div class="surface-card">
+                    <h3>Search Property by UPIN</h3>
+                    <p class="muted-small">Retrieve current legal owner and full block mutation timeline.</p>
+                    <div class="location-input-group" style="margin-bottom: 1rem;">
+                        <input type="text" id="searchUpinInput" placeholder="Enter UPIN (e.g. from sample deed)...">
+                        <button type="button" class="btn btn-primary" onclick="searchPropertyByUpin()">Search</button>
+                    </div>
+                    <div id="upinSearchResult" style="display: none;"></div>
+                </div>
+
+                <!-- Cryptographic PDF Tamper Detector -->
+                <div class="surface-card">
+                    <h3>Verify Sale Deed Authenticity</h3>
+                    <p class="muted-small">Upload any PDF deed to compare its SHA-256 byte hash against minted blocks.</p>
+                    <div class="upload-zone" style="margin-bottom: 1rem;">
+                        <input type="file" id="verifyFileInput" accept=".pdf, image/png, image/jpeg">
+                        <button type="button" class="btn btn-secondary" onclick="verifyDeedFile()">Verify Hash</button>
+                    </div>
+                    <div id="deedVerifyResult" style="display: none;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== PAGE 5: BLOCKCHAIN LEDGER ==================== -->
+        <section id="records" class="page">
+            <div class="ledger-header-row">
+                <div>
+                    <span class="tag-pill">IMMUTABLE DISTRIBUTED LEDGER</span>
+                    <h2>Blockchain Explorer</h2>
+                    <p style="margin-bottom: 0;">Complete cryptographic record of all minted land registrations and ownership mutations.</p>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="runChainAudit()">
+                    Audit Chain Integrity
+                </button>
+            </div>
+
+            <div id="auditBanner" class="flash-banner flash-success" style="display: none; margin-top: 1rem;"></div>
+
+            <div class="surface-card" style="margin-top: 1.25rem; padding: 0;">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Block</th>
+                                <th>Timestamp</th>
+                                <th>Transaction Type &amp; Property Payload</th>
+                                <th>Previous Block Hash</th>
+                                <th>Current SHA-256 Hash</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for block in chain %}
+                                <tr>
+                                    <td><span class="block-badge">#{{ block.index }}</span></td>
+                                    <td class="mono-cell">{{ block.timestamp }}</td>
+                                    <td class="payload-cell">
+                                        {% if block.data is mapping and block.data.type == 'ADD PROPERTY' %}
+                                            <span class="tx-tag tx-mint">MINT · INITIAL REGISTRATION</span>
+                                            <div class="payload-grid">
+                                                <div><strong>UPIN:</strong> {{ block.data.property_id }}</div>
+                                                <div><strong>Owner:</strong> {{ block.data.owner }}</div>
+                                                <div><strong>Category:</strong> {{ block.data.category }}</div>
+                                                <div><strong>Area:</strong> {{ block.data.area }}</div>
+                                                <div class="full-span"><strong>Location:</strong> {{ block.data.location }}</div>
+                                                {% if block.data.document_hash %}
+                                                    <div class="full-span mono-sub"><strong>Deed SHA-256:</strong> {{ block.data.document_hash[:24] }}...</div>
+                                                {% endif %}
+                                            </div>
+                                        {% elif block.data is mapping and block.data.type == 'TRANSFER PROPERTY' %}
+                                            <span class="tx-tag tx-transfer">MUTATION · OWNERSHIP TRANSFER</span>
+                                            <div class="payload-grid">
+                                                <div><strong>UPIN:</strong> {{ block.data.property_id }}</div>
+                                                <div><strong>From Seller:</strong> {{ block.data.previous_owner }}</div>
+                                                <div><strong>To Buyer:</strong> {{ block.data.owner }}</div>
+                                                <div><strong>Instrument:</strong> {{ block.data.transfer_reason }}</div>
+                                            </div>
+                                        {% else %}
+                                            <span class="tx-tag tx-genesis">GENESIS BLOCK</span>
+                                            <div>{{ block.data }}</div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="mono-cell" title="{{ block.previous_hash }}">{{ block.previous_hash[:12] }}...</td>
+                                    <td class="mono-cell hash-highlight" title="{{ block.hash }}">{{ block.hash[:12] }}...</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <span><strong>LandChain India v3.0</strong> · Zero-Trust Cadastral DLT Registry</span>
+            <span class="disclaimer">Academic Prototype · Flask, SHA-256, OpenStreetMap &amp; Gemini AI</span>
+        </div>
+    </footer>
+
+    <script>
+        function navigateTo(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) targetPage.classList.add('active');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.getAttribute('data-target') === pageId) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetRegistrationInputs() {
+            ['inputOwner', 'inputId', 'inputArea', 'inputLocation', 'inputCategory', 'inputDocHash', 'inputVerifiedCoords'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            document.getElementById('mapContainer').style.display = 'none';
+            document.getElementById('hashPreviewBox').style.display = 'none';
+            document.getElementById('confidenceBadge').style.display = 'none';
+        }
+
+        function validateForm() {
+            const owner = document.getElementById('inputOwner').value.trim();
+            const location = document.getElementById('inputLocation').value.trim();
+            const category = document.getElementById('inputCategory').value.trim();
+            const area = document.getElementById('inputArea').value.trim();
+            const property_id = document.getElementById('inputId').value.trim();
+
+            if (!owner && !location && !category && !area && !property_id) {
+                alert("Please upload and scan a Sale Deed before registering a property.");
+                return false;
+            }
+
+            let missingFields = [];
+            if (!owner) missingFields.push("Owner Full Name");
+            if (!location) missingFields.push("Property Location");
+            if (!category) missingFields.push("Property Category");
+            if (!area) missingFields.push("Area");
+            if (!property_id) missingFields.push("Unique Property ID");
+
+            if (missingFields.length > 0) {
+                alert("Incomplete extraction!\n\nThe following details could not be found in the document:\n• " + missingFields.join("\n• ") + "\n\nPlease upload a valid, clearly formatted sale deed.");
+                return false;
+            }
+            return true;
+        }
+
+        async function extractData() {
+            const fileInput = document.getElementById('documentUpload');
+            const statusText = document.getElementById('ocrStatus');
+
+            if (fileInput.files.length === 0) {
+                alert('Please select a PDF or image deed first.');
+                return;
+            }
+
+            resetRegistrationInputs();
+
+            statusText.style.display = 'block';
+            statusText.style.color = '#0B6E4F';
+            statusText.textContent = 'Computing SHA-256 file fingerprint & extracting legal entities...';
+
+            const formData = new FormData();
+            formData.append('document', fileInput.files[0]);
+
+            try {
+                const response = await fetch('/extract', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.error) {
+                    statusText.style.color = '#B91C1C';
+                    statusText.textContent = 'Extraction Error: ' + data.error;
+                } else {
+                    document.getElementById('inputOwner').value = data.owner || '';
+                    document.getElementById('inputId').value = data.property_id || '';
+                    document.getElementById('inputArea').value = data.area || '';
+                    document.getElementById('inputLocation').value = data.location || '';
+                    document.getElementById('inputCategory').value = data.category || '';
+                    document.getElementById('inputDocHash').value = data.document_hash || '';
+
+                    if (data.document_hash) {
+                        document.getElementById('hashPreviewBox').style.display = 'flex';
+                        document.getElementById('docHashDisplay').textContent = data.document_hash;
+                        document.getElementById('engineBadge').textContent = data.engine || 'Regex Verified';
+                    }
+
+                    if (data.confidence) {
+                        const badge = document.getElementById('confidenceBadge');
+                        badge.style.display = 'inline-flex';
+                        badge.textContent = `${data.confidence}% Confidence`;
+                    }
+
+                    if (data.already_registered) {
+                        statusText.style.color = '#B45309';
+                        statusText.textContent = `Notice: UPIN #${data.property_id} is already registered to "${data.existing_owner}" in Block #${data.existing_block_index}. Duplicate registration will be blocked.`;
+                    } else {
+                        statusText.style.color = '#0B6E4F';
+                        statusText.textContent = 'Zero-Trust Extraction Complete. Fields cryptographically locked.';
+                    }
+
+                    if (data.location) {
+                        verifyMapLocation();
+                    }
+                }
+            } catch (error) {
+                statusText.style.color = '#B91C1C';
+                statusText.textContent = 'Extraction failed. Please check server logs.';
+                console.error(error);
+            }
+        }
+
+        async function verifyMapLocation() {
+            const officialAddress = document.getElementById('inputLocation').value;
+            const mapContainer = document.getElementById('mapContainer');
+            const mapIframe = document.getElementById('osmMap');
+            const mapStatus = document.getElementById('mapStatus');
+
+            if (!officialAddress) {
+                alert('Please scan a document first.');
+                return;
+            }
+
+            mapContainer.style.display = 'block';
+            mapStatus.textContent = 'Querying OpenStreetMap Nominatim coordinates...';
+            mapStatus.style.color = '#525252';
+            mapIframe.src = '';
+
+            async function trySearch(searchQuery) {
+                const res = await fetch('/verify_location', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ address: searchQuery })
+                });
+                return await res.json();
+            }
+
+            try {
+                let cleanQuery = officialAddress.replace(/.*situated at\s*/i, '').replace(/bearing No\.\s*/i, '');
+                let data = await trySearch(cleanQuery);
+
+                if (data.error && cleanQuery.includes(',')) {
+                    mapStatus.textContent = 'Refining parcel query to locality level...';
+                    const parts = cleanQuery.split(',');
+                    const simplifiedQuery = parts.slice(Math.max(parts.length - 3, 0)).join(',');
+                    data = await trySearch(simplifiedQuery.trim());
+                }
+
+                if (data.error) {
+                    mapStatus.textContent = 'Exact plot pin unavailable in OSM; general locality recorded.';
+                    mapStatus.style.color = '#B45309';
+                } else {
+                    const lat = parseFloat(data.lat);
+                    const lon = parseFloat(data.lon);
+                    document.getElementById('inputVerifiedCoords').value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+
+                    mapStatus.textContent = `Verified Coordinates (${lat.toFixed(4)}, ${lon.toFixed(4)}): ${data.display_name}`;
+                    mapStatus.style.color = '#0B6E4F';
+
+                    const offset = 0.005;
+                    const bbox = `${lon - offset},${lat - offset},${lon + offset},${lat + offset}`;
+                    mapIframe.src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lon}`;
+                }
+            } catch (error) {
+                mapStatus.textContent = 'Geospatial API connection failed.';
+                mapStatus.style.color = '#B91C1C';
+            }
+        }
+
+        async function prefillCurrentOwner() {
+            const upin = document.getElementById('transferUpin').value.trim();
+            const status = document.getElementById('transferLookupStatus');
+            if (!upin) {
+                alert('Enter a UPIN first.');
+                return;
+            }
+            status.style.display = 'block';
+            status.textContent = 'Looking up UPIN on blockchain...';
+            try {
+                const res = await fetch(`/search_upin/${encodeURIComponent(upin)}`);
+                const data = await res.json();
+                if (data.found) {
+                    document.getElementById('transferCurrentOwner').value = data.current_owner;
+                    status.style.color = '#0B6E4F';
+                    status.textContent = `Found UPIN #${upin}. Current legal owner "${data.current_owner}" auto-filled from Block #${data.latest_block.index}.`;
+                } else {
+                    status.style.color = '#B91C1C';
+                    status.textContent = data.error;
+                }
+            } catch (e) {
+                status.style.color = '#B91C1C';
+                status.textContent = 'Lookup failed.';
+            }
+        }
+
+        async function searchPropertyByUpin() {
+            const upin = document.getElementById('searchUpinInput').value.trim();
+            const box = document.getElementById('upinSearchResult');
+            if (!upin) return;
+
+            box.style.display = 'block';
+            box.innerHTML = '<p class="status-line">Searching blockchain ledger...</p>';
+
+            try {
+                const res = await fetch(`/search_upin/${encodeURIComponent(upin)}`);
+                const data = await res.json();
+                if (!data.found) {
+                    box.innerHTML = `<div class="verify-alert alert-danger">${data.error}</div>`;
+                    return;
+                }
+
+                let timelineHtml = data.history.map(b => `
+                    <div class="timeline-item">
+                        <div class="timeline-head">
+                            <span class="block-badge">Block #${b.index}</span>
+                            <span class="mono-cell">${b.timestamp}</span>
+                        </div>
+                        <div style="margin-top: 6px; font-size: 0.88rem;">
+                            <strong>${b.data.type}:</strong>
+                            ${b.data.type === 'TRANSFER PROPERTY'
+                                ? `${b.data.previous_owner} → <strong>${b.data.owner}</strong>`
+                                : `Minted to <strong>${b.data.owner}</strong> (${b.data.category}, ${b.data.area})`}
+                        </div>
+                        <div class="mono-sub">Block Hash: ${b.hash.substring(0, 20)}...</div>
+                    </div>
+                `).join('');
+
+                box.innerHTML = `
+                    <div class="verify-alert alert-ok">
+                        <div><strong>Active Title Verified for UPIN #${data.property_id}</strong></div>
+                        <div style="margin-top:4px;">Current Legal Owner: <strong>${data.current_owner}</strong></div>
+                        <div style="font-size:0.82rem;">Total On-Chain Events: ${data.total_transactions}</div>
+                    </div>
+                    <div class="timeline-list">${timelineHtml}</div>
+                `;
+            } catch (e) {
+                box.innerHTML = `<div class="verify-alert alert-danger">Error querying ledger.</div>`;
+            }
+        }
+
+        async function verifyDeedFile() {
+            const fileInput = document.getElementById('verifyFileInput');
+            const box = document.getElementById('deedVerifyResult');
+            if (fileInput.files.length === 0) {
+                alert('Select a PDF or image deed to verify.');
+                return;
+            }
+
+            box.style.display = 'block';
+            box.innerHTML = '<p class="status-line">Computing SHA-256 digest & scanning blocks...</p>';
+
+            const formData = new FormData();
+            formData.append('document', fileInput.files[0]);
+
+            try {
+                const res = await fetch('/verify_deed_integrity', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.authentic) {
+                    box.innerHTML = `
+                        <div class="verify-alert alert-ok">
+                            <div><strong>AUTHENTIC DEED VERIFIED ON BLOCKCHAIN</strong></div>
+                            <div style="margin-top:6px; font-size:0.86rem;">
+                                Minted in <strong>Block #${data.block_index}</strong> on ${data.timestamp}<br>
+                                Registered UPIN: <strong>${data.property_data.property_id}</strong><br>
+                                Current Legal Owner: <strong>${data.current_owner}</strong>
+                            </div>
+                            <div class="mono-sub" style="margin-top:6px;">SHA-256: ${data.document_hash}</div>
+                        </div>
+                    `;
+                } else {
+                    box.innerHTML = `
+                        <div class="verify-alert alert-danger">
+                            <div><strong>UNREGISTERED OR TAMPERED DOCUMENT</strong></div>
+                            <p style="margin:6px 0; font-size:0.85rem;">${data.message}</p>
+                            <div class="mono-sub">Computed SHA-256: ${data.document_hash}</div>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                box.innerHTML = `<div class="verify-alert alert-danger">Verification request failed.</div>`;
+            }
+        }
+
+        async function runChainAudit() {
+            const banner = document.getElementById('auditBanner');
+            banner.style.display = 'flex';
+            banner.textContent = 'Recalculating SHA-256 hashes across all blocks...';
+            try {
+                const res = await fetch('/audit_chain');
+                const data = await res.json();
+                banner.className = 'flash-banner ' + (data.valid ? 'flash-success' : 'flash-error');
+                banner.innerHTML = `<span><strong>Cryptographic Audit Complete:</strong> ${data.message}</span>`;
+            } catch (e) {
+                banner.className = 'flash-banner flash-error';
+                banner.textContent = 'Failed to run chain audit.';
+            }
+        }
+    </script>
+</body>
+</html>

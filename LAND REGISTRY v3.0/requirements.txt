@@ -1,0 +1,9 @@
+Flask
+requests
+pytesseract
+PyPDF2
+Pillow
+Werkzeug
+google-genai
+python-dotenv
+web3
