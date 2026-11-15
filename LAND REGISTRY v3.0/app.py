@@ -83,7 +83,10 @@ def extract_entities_from_text(text):
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
-                    temperature=0.1
+                    temperature=0.1,
+                    http_options=types.HttpOptions(
+                        timeout=60000
+                    )
                 )
             )
             llm_data = json.loads(response.text)
